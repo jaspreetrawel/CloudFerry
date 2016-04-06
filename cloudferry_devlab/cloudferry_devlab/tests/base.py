@@ -25,6 +25,8 @@ from neutronclient.v2_0 import client as neutron
 from novaclient import exceptions as nova_exceptions
 from novaclient.v2 import client as nova
 from swiftclient import client as swift_client
+from nose import config as nose_config
+from nose.plugins import manager as nose_manager
 
 from cloudferry_devlab.tests import test_exceptions
 import cloudferry_devlab.tests.utils as utils
@@ -258,9 +260,21 @@ class BasePrerequisites(object):
     def get_user_tenant_roles(self, user):
         user_tenant_roles = []
         for tenant in self.keystoneclient.tenants.list():
-            user_tenant_roles.extend(self.keystoneclient.roles.roles_for_user(
-                user=self.get_user_id(user.name),
-                tenant=self.get_tenant_id(tenant.name)))
+            user_tenant_roles.extend(
+                self.keystoneclient.roles.roles_for_user(
+                    user=self.get_user_id(user.name),
+                    tenant=self.get_tenant_id(tenant.name)))
+        return user_tenant_roles
+
+    def get_roles_for_user(self, user, tenant_attrib):
+        user_tenant_roles = []
+        for tenant in self.keystoneclient.tenants.list():
+            if tenant.name.lower() == tenant_attrib.lower():
+                user_tenant_roles.extend(
+                    self.keystoneclient.roles.roles_for_user(
+                        user=self.get_user_id(user.name),
+                        tenant=self.get_tenant_id(tenant.name)))
+                break
         return user_tenant_roles
 
     def get_ext_routers(self):
@@ -416,6 +430,20 @@ class BasePrerequisites(object):
 
     def get_abs_path(self, file_path):
         return os.path.join(os.path.dirname(self.results_path), file_path)
+
+
+def get_nosetest_cmd_attribute_val(attribute):
+    env = os.environ
+    manager = nose_manager.DefaultPluginManager()
+    cfg_files = nose_config.all_config_files()
+    tmp_config = nose_config.Config(env=env, files=cfg_files, plugins=manager)
+    tmp_config.configure()
+    try:
+        attr_list = getattr(tmp_config.options, 'attr')
+        value = dict(token.split('=') for token in attr_list)
+        return value[attribute]
+    except TypeError:
+        return None
 
 
 def get_dict_from_config_file(config_file):

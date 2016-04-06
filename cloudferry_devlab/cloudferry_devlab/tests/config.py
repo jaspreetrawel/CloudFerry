@@ -67,6 +67,12 @@ ext_net_map = 'ext_net_map.yaml'
 """This file contains map of relationships between external networks on source
 and destination clouds."""
 
+case_sensitivity_test_user = 'user10'
+"""User to be created in CAPITAL case on DST Cloud."""
+
+case_sensitivity_test_tenant = 'tenant6'
+"""Tenant to be created in CAPITAL case on DST Cloud."""
+
 users = [
     {'name': 'user1', 'password': 'passwd1', 'email': 'mail@example.com',
      'tenant': 'tenant1', 'enabled': True},
@@ -89,12 +95,23 @@ users = [
      'tenant': 'tenant3', 'enabled': True},
     {'name': 'user9', 'password': 'passwd', 'email': 'user8@example.com',
      'tenant': 'tenant5', 'enabled': True},
+    {'name': 'user10', 'password': 'passwd', 'email': 'user10@example.com',
+     'tenant': 'tenant6', 'enabled': True}
 ]
-"""Users to create/delete"""
+"""SRC Users to create/delete"""
+
+dst_users = [
+    {'name': case_sensitivity_test_user.upper(), 'password': 'PASSWD',
+     'email': 'user_10@example.com',
+     'tenant': case_sensitivity_test_tenant.upper(), 'enabled': True}
+]
+"""DST Users to create"""
 
 user_tenant_roles = [
     {'user9': [{'tenant': 'tenant5', 'role': 'SomeRole'}]},
-    {'user1': [{'tenant': 'tenant1', 'role': 'SomeRole'}]}
+    {'user1': [{'tenant': 'tenant1', 'role': 'SomeRole'}]},
+    {case_sensitivity_test_user: [{'tenant': case_sensitivity_test_tenant,
+                                   'role': 'SecondRole'}]}
 ]
 
 roles = [
@@ -379,7 +396,10 @@ tenants = [
           'nics': [{'net-id': 'tenant5net2', 'v4-fixed-ip': '123.2.2.101'}]}
          ],
      'images': [{'name': 'cirros_image_for_tenant5', 'copy_from': img_url,
-                 'is_public': True}],
+                 'is_public': True}]
+     },
+    {'name': 'tenant6', 'description': 'None',
+     'enabled': True, 'capital': True
      }
 ]
 """Tenants to create/delete"""
