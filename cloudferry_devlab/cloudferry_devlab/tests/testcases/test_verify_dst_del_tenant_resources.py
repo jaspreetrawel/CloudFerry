@@ -42,6 +42,11 @@ class VerifyDstDeletedTenantResources(functional_test.FunctionalTest):
         self.dst_volumes_admin = \
             {vol.display_name: vol for vol in dst_cinder_volumes}
 
+        dst_swift_containers = self.dst_cloud.get_swift_account()[1]
+
+        self.dst_containers_admin = \
+            [cont.name for cont in dst_swift_containers]
+
         self.dst_vm_list = \
             self.dst_cloud.novaclient.servers.list(
                 search_opts={'tenant_id': self.dst_tenants[
@@ -104,6 +109,15 @@ class VerifyDstDeletedTenantResources(functional_test.FunctionalTest):
                 if not self._volume_is_attached_to_vm(volume_obj):
                     result_vol_ids.append(volume_obj.id)
         return result_vol_ids
+
+    def _tenant_containers_exist_on_dst(self, src_containers_list):
+        result_cont_names = []
+        src_cont_list_by_name = [cont['name'] for cont in
+                                     src_containers_list]
+        for cont_name in self.dst_containers_admin.iteritems():
+            if cont_name in src_cont_list_by_name:
+		result_cont_names.append(cont_name)
+        return result_cont_names
 
     def _get_tenant_users_with_keypair(self, tenant_name):
         user_names_tenant = \
@@ -192,6 +206,23 @@ class VerifyDstDeletedTenantResources(functional_test.FunctionalTest):
             msg = ("Tenant's cinder volumes with ids {0} exist on "
                    "destination, but should be deleted!")
             self.fail(msg.format(undeleted_volumes))
+
+    @attr(migrated_tenant=['admin'])
+    def test_tenants_containers_on_dst(self):
+        """Validate deleted tenant's containers were migrated."""
+        undeleted_containers = []
+        for tenant_name, tenant in self.deleted_tenants:
+
+            tenant_undeleted_containers = \
+                self._tenant_containers_exist_on_dst(tenant['swift_containers'])
+            if tenant_undeleted_containers:
+                undeleted_containers.append(
+                    {tenant_name: tenant_undeleted_containers})
+
+        if undeleted_containers:
+            msg = ("Tenant's swift containers with names {0} exist on "
+                   "destination, but should be deleted!")
+            self.fail(msg.format(undeleted_containers))
 
     @attr(migrated_tenant=['admin', 'tenant1', 'tenant2'])
     def test_tenant_key_exists_on_dst(self):

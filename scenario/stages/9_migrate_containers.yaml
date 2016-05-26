@@ -1,0 +1,12 @@
+# Stage to migrate swift container resource.
+
+preparation:
+  - create_snapshot: True
+
+rollback:
+  - restore_from_snapshot: True
+
+process:
+  - act_get_filter: True
+  - act_check_filter: True
+  - act_copy_Obj_to_obj_trans: True

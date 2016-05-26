@@ -121,6 +121,12 @@ class BasePrerequisites(object):
         with self.swift_connection() as swift_conn:
             swift_conn.delete_container(container_name)
 
+    def get_swift_account(self):
+        """Get list of containers"""
+
+        with self.swift_connection() as swift_conn:
+            swift_conn.get_account()
+
     def put_swift_object(self, container_name, obj_name, contents=None):
         """Create an object."""
 
@@ -138,6 +144,12 @@ class BasePrerequisites(object):
 
         with self.swift_connection() as swift_conn:
             swift_conn.delete_object(container_name, obj_name)
+
+    def get_swift_object(self):
+        """Get list of container objects"""
+
+        with self.swift_connection() as swift_conn:
+            swift_conn.get_container(container_name)
 
     def _get_openstack_release(self):
         for release in OPENSTACK_RELEASES:

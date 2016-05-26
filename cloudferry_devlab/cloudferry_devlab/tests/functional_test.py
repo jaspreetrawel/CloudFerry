@@ -222,6 +222,15 @@ class FunctionalTest(unittest.TestCase):
         return [i for i in self.src_cloud.cinderclient.volumes.list(**opts)
                 if i.display_name in volumes_names]
 
+    def filter_containers(self):
+        containers = config.swift_containers
+        for tenant in config.tenants:
+            if 'swift_containers' in tenant and not tenant.get('deleted'):
+                containers.extend(tenant['swift_containers'])
+        container_names = [container.get('name') for container in containers]
+        return [i for i in self.src_cloud.get_swift_account()[1]
+                if i.name in container_names]
+
     def filter_health_monitors(self):
         hm = self.src_cloud.neutronclient.list_health_monitors()
         final_hm = [m for m in hm['health_monitors']
