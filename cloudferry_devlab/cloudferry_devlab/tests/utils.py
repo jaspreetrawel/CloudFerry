@@ -82,6 +82,14 @@ class FilteringUtils(Utils):
                     popped_vm_list.append(vm)
             current_data_list = filtered_vms_by_id
 
+        filtered_vms_by_state = []
+        for vm in current_data_list:
+            if vm.status == 'ERROR':
+                popped_vm_list.append(vm)
+            else:
+                filtered_vms_by_state.append(vm)
+        current_data_list = filtered_vms_by_state
+
         return [current_data_list, popped_vm_list]
 
     def filter_images(self, src_data_list):

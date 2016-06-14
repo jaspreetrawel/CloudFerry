@@ -39,16 +39,15 @@ class VmMigration(functional_test.FunctionalTest):
         if not src_vms:
             self.skipTest("Nothing to migrate - check the filter config "
                           "file. Probably in the instances id list in the "
-                          "config file is not specified VMs for migration "
-                          "or is specified tenant id and VMs that not belong "
-                          "to this tenant.")
+                          "config file, VMs are not specified for migration "
+                          "or the specified tenant id and VMs do not belong "
+                          "to this tenant or all VMs in SRC in error state")
 
-        src_vms = [vm for vm in src_vms if vm.status != 'ERROR' and
-                   self.tenant_exists(self.src_cloud.keystoneclient,
-                                      vm.tenant_id)]
+        src_vms = [vm for vm in src_vms
+                   if self.tenant_exists(self.src_cloud.keystoneclient,
+                                         vm.tenant_id)]
         if not src_vms:
-            self.fail("All VMs in SRC was in error state or "
-                      "VM's tenant in SRC doesn't exist")
+            self.fail("VM's tenant in SRC doesn't exist")
 
         dst_vms = self.dst_cloud.novaclient.servers.list(
             search_opts={'all_tenants': 1})
@@ -173,10 +172,8 @@ class VmMigration(functional_test.FunctionalTest):
         dst_vms = self.dst_cloud.novaclient.servers.list(
             search_opts={'all_tenants': 1})
 
-        filtering_data = self.filtering_utils \
-            .filter_vms_with_filter_config_file(src_vms)
-        src_vms = filtering_data[0]
-        src_vms = [vm for vm in src_vms if vm.status != 'ERROR']
+        src_vms = self.filtering_utils\
+            .filter_vms_with_filter_config_file(src_vms)[0]
 
         def compare_vm_parameter(param, vm1, vm2):
             msgs = []
@@ -216,9 +213,8 @@ class VmMigration(functional_test.FunctionalTest):
         dst_vms = self.dst_cloud.novaclient.servers.list(
             search_opts={'all_tenants': 1})
 
-        filtering_data = self.filtering_utils \
-            .filter_vms_with_filter_config_file(src_vms)
-        src_vms = filtering_data[0]
+        src_vms = self.filtering_utils\
+            .filter_vms_with_filter_config_file(src_vms)[0]
 
         fail_msg = []
         self.set_hash_for_vms(src_vms)
