@@ -170,7 +170,7 @@ tenants = [
      ],
      'vms': [
          {'name': 'tn1server1', 'image': 'image1', 'flavor': 'del_flvr',
-          'key_name': 'key1', 'server_group': 'tn1_server_group'}
+          'key_name': 'key1', 'fip': True, 'server_group': 'tn1_server_group'}
      ],
      'networks': [
          {'name': 'tenantnet1', 'admin_state_up': True,
@@ -298,7 +298,7 @@ tenants = [
                'enable_dhcp': False, 'routers_to_connect': ['ext_router']}]}],
      'vms': [
          {'name': 'tn3server1', 'image': 'image1', 'flavor': 'flavorname1',
-          'key_name': 'key4'}],
+          'fip': True, 'key_name': 'key4'}],
      'cinder_volumes': [
          {'display_name': 'tn3_volume1', 'size': 1,
           'server_to_attach': 'tn3server1', 'device': '/dev/vdb'}],
