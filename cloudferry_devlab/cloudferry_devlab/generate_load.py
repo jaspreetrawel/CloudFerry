@@ -708,6 +708,9 @@ class Prerequisites(base.BasePrerequisites):
         self.log.debug('Creating cinder volumes.')
         vlm_ids = []
         for volume in volumes_list:
+            initial_tenant = self.keystoneclient.tenant_name
+            initial_user = self.keystoneclient.username
+            initial_password = self.keystoneclient.password
             if 'user' in volume:
                 user = [u for u in self.config.users
                         if u['name'] == volume['user']][0]
@@ -715,6 +718,9 @@ class Prerequisites(base.BasePrerequisites):
                                  tenant=user['tenant'])
             vlm = self.cinderclient.volumes.create(
                 **get_params_for_volume_creating(volume))
+            self.switch_user(user=initial_user, password=initial_password,
+                             tenant=initial_tenant)
+
             # pylint: disable=no-member
             vlm_ids.append(vlm.id)
         self.switch_user(user=self.username, password=self.password,
